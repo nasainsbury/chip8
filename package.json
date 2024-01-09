@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@types/blessed": "^0.1.25",
+    "blessed": "^0.1.81"
+  }
+}
