@@ -1,6 +1,7 @@
 import blessed from "blessed";
 
 type Bit = 1 | 0;
+const keyMap = ['1', '2', '3', '4', 'q', 'w', 'e', 'r', 'a', 's', 'd', 'f', 'z', 'x', 'c', 'v']
 
 export interface CPUInterface {
   createFrameBuffer(): void;
@@ -9,20 +10,33 @@ export interface CPUInterface {
 }
 
 export class TerminalInterface implements CPUInterface {
-  public width: 64;
-  public height: 32;
+  public width = 64;
+  public height = 32;
   public buffer: Bit[][] = [];
   private blessed = blessed;
+  private color = this.blessed.colors.match("#FFF");
   private screen = this.blessed.screen({ smartCSR: true });
+  private key: string | undefined;
 
   constructor() {
     this.createFrameBuffer();
+
+    this.screen.on('keypress', (_,key) => {
+      this.key = key.full;
+    });
+
+    setInterval(() => {
+      // Emulate a keyup event to clear all pressed keys
+      this.key = undefined;
+    }, 100)
   }
+
+
 
   public createFrameBuffer() {
     for (let x = 0; x < this.width; x++) {
-      this.buffer.push([]);
-      for (let y = 0; x < this.height; y++) {
+      const row = []
+      for (let y = 0; y < this.height; y++) {
         this.buffer[x].push(0);
       }
     }
@@ -38,7 +52,8 @@ export class TerminalInterface implements CPUInterface {
 
     // Pixel present
     if (this.buffer[y][x]) {
-      this.screen.fillRegion("", "█", x, x + 1, y, y + 1);
+      console.log("cool");
+      this.screen.fillRegion(this.color, "█", x, x + 1, y, y + 1);
     } else {
       this.screen.clearRegion(x, x + 1, y, y + 1);
     }

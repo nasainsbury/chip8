@@ -29,6 +29,7 @@ export enum InstructionName {
   JP_V0_ADDR,
   RND_VX,
   DRW_VX_VY_NIB,
+  SKP_VX
 }
 
 const instructions: Instruction[] = [
@@ -214,6 +215,14 @@ const instructions: Instruction[] = [
       { mask: 0x0f00, shift: 8 },
       { mask: 0x00f0, shift: 4 },
       { mask: 0x000f, shift: 0 },
+    ],
+  },
+  {
+    name: InstructionName.SKP_VX,
+    mask: 0xf0ff,
+    pattern: 0xe09e,
+    arguments: [
+      { mask: 0x0f00, shift: 8 },
     ],
   },
 ];

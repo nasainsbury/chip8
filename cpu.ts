@@ -5,8 +5,8 @@ import instructions, {
 
 import { type TerminalInterface } from "./interface";
 
-class CPU {
-  private memory = new Uint8Array(4096);
+export class CPU {
+  public memory = new Uint8Array(4096);
   private registers = new Uint8Array(16);
   private stack = new Uint16Array(16);
   private ST = 0;
@@ -14,12 +14,36 @@ class CPU {
   private I = 0;
   private SP = -1;
   private PC = 0x200;
+  private halted = false;
   private cpuInterface: TerminalInterface;
 
   constructor(cpuInterface: TerminalInterface) {
     this.cpuInterface = cpuInterface;
   }
 
+  public load(rom: Buffer){
+    console.log(rom)
+    // rom.forEach((hex, index) => {
+    //   console.log(hex)
+    //   // First byte
+    //   this.memory[0x200 + index] = hex >> 8;
+    //   // Second byte
+    //   this.memory[0x200 + index + 1] = hex & 0xff;
+    // });
+  }
+  private halt() {
+    this.halted = true;
+  }
+  private fetch() {
+    if (this.PC > 4094) {
+      this.halted = true;
+      throw new Error("Memory out of bounds")
+    }
+
+    const opcode = (this.memory[this.PC] << 8) | this.memory[this.PC + 1]
+
+    return opcode;
+  }
   private skipInstruction() {
     this.PC += 4;
   }
@@ -113,7 +137,7 @@ class CPU {
         this.registers[args[0]] *= this.registers[args[1]];
         this.nextInstruction();
         break;
-      case InstructionName.ADD_VX:
+      case InstructionName.ADD_VX_VY:
         const sum = this.registers[args[0]] + this.registers[args[1]];
         this.registers[0xf] = sum > 0xff ? 1 : 0;
         this.registers[args[0]] = sum;
@@ -180,8 +204,25 @@ class CPU {
         }
         this.nextInstruction();
         break;
-      default:
+      case InstructionName.SKP_VX:
+        break;
+        default:
         return;
     }
   }
+
+  public step() {
+    if (this.halted) {
+      throw new Error("Computer has stopped this program.")
+    }
+
+    try {
+      const opcode = this.fetch();
+      const { instruction, args } = this.getInstruction(opcode);
+      this.execute(instruction, args);
+    } catch (err) {
+      console.error(err);
+      this.halt()
+    }
+  } 
 }
