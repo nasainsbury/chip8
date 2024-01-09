@@ -2,5 +2,23 @@
   "dependencies": {
     "@types/blessed": "^0.1.25",
     "blessed": "^0.1.81"
-  }
+  },
+  "name": "cpu",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nasainsbury/chip8.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nasainsbury/chip8/issues"
+  },
+  "homepage": "https://github.com/nasainsbury/chip8#readme",
+  "description": ""
 }
