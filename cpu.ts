@@ -21,27 +21,16 @@ export class CPU {
     this.cpuInterface = cpuInterface;
   }
 
-  public load(rom: Buffer){
-    console.log(rom)
-    // rom.forEach((hex, index) => {
-    //   console.log(hex)
-    //   // First byte
-    //   this.memory[0x200 + index] = hex >> 8;
-    //   // Second byte
-    //   this.memory[0x200 + index + 1] = hex & 0xff;
-    // });
-  }
   private halt() {
     this.halted = true;
   }
   private fetch() {
     if (this.PC > 4094) {
       this.halted = true;
-      throw new Error("Memory out of bounds")
+      throw new Error("Memory out of bounds");
     }
 
-    const opcode = (this.memory[this.PC] << 8) | this.memory[this.PC + 1]
-
+    const opcode = (this.memory[this.PC] << 8) | this.memory[this.PC + 1];
     return opcode;
   }
   private skipInstruction() {
@@ -205,15 +194,113 @@ export class CPU {
         this.nextInstruction();
         break;
       case InstructionName.SKP_VX:
+        if (this.cpuInterface.getKeys() & (1 << this.registers[args[0]])) {
+          this.skipInstruction();
+        } else {
+          this.nextInstruction();
+        }
         break;
-        default:
+      case InstructionName.SKNP_VX:
+        if (this.cpuInterface.getKeys() & (1 << this.registers[args[0]])) {
+          this.nextInstruction();
+        } else {
+          this.skipInstruction();
+        }
+        break;
+      case InstructionName.LD_VX_DT:
+        this.registers[args[0]] = this.DT;
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_VX_K:
+        const keyPress = this.cpuInterface.getKey();
+        if (!keyPress) {
+          return;
+        }
+
+        this.registers[args[0]] = keyPress;
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_DT_VX:
+        this.DT = this.registers[args[0]];
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_ST_VX:
+        this.ST = this.registers[args[0]];
+        this.nextInstruction();
+        break;
+      case InstructionName.ADD_I_VX:
+        this.I += this.registers[args[0]];
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_F_VX:
+        if (this.registers[args[0]] > 0xf) {
+          this.halt();
+          throw new Error("Invalid digit.");
+        }
+        // sprites are 5 bytes long, so the "3rd" sprite, starts
+        // at byte 3 * 5 = 15. This is why we multiple the value in the register
+        this.I = this.registers[args[0]] * 5;
+
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_B_VX:
+        if (this.I > 4093) {
+          this.halt();
+          throw new Error("memory out of bounds");
+        }
+
+        const x = this.registers[args[0]];
+
+        const hundreds = Math.floor(x / 100);
+        const tens = Math.floor((x % 100) / 10);
+        const ones = x % 10;
+
+        this.memory[this.I] = hundreds;
+        this.memory[this.I + 1] = tens;
+        this.memory[this.I + 2] = ones;
+
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_I_VX:
+        if (this.I > 4095 - args[0]) {
+          this.halt();
+          throw new Error("Memory out of bounds.");
+        }
+
+        for (let i = 0; i <= args[0]; i++) {
+          this.memory[this.I + i] = this.registers[i];
+        }
+
+        this.nextInstruction();
+        break;
+      case InstructionName.LD_I_VX:
+        if (this.I > 4095 - args[0]) {
+          this.halt();
+          throw new Error("Memory out of bounds.");
+        }
+
+        for (let i = 0; i <= args[0]; i++) {
+          this.registers[i] = this.memory[this.I + i];
+        }
+
+        this.nextInstruction();
+        break;
+      default:
         return;
     }
   }
-
+  public load(rom: Buffer) {
+    rom.forEach((hex, index) => {
+      console.log(hex);
+      // First byte
+      this.memory[0x200 + index] = hex >> 8;
+      // Second byte
+      this.memory[0x200 + index + 1] = hex & 0xff;
+    });
+  }
   public step() {
     if (this.halted) {
-      throw new Error("Computer has stopped this program.")
+      throw new Error("Computer has stopped this program.");
     }
 
     try {
@@ -222,7 +309,7 @@ export class CPU {
       this.execute(instruction, args);
     } catch (err) {
       console.error(err);
-      this.halt()
+      this.halt();
     }
-  } 
+  }
 }

@@ -29,7 +29,17 @@ export enum InstructionName {
   JP_V0_ADDR,
   RND_VX,
   DRW_VX_VY_NIB,
-  SKP_VX
+  SKP_VX,
+  SKNP_VX,
+  LD_VX_DT,
+  LD_VX_K,
+  LD_DT_VX,
+  LD_ST_VX,
+  ADD_I_VX,
+  LD_F_VX,
+  LD_B_VX,
+  LD_I_VX,
+  LD_VX_I,
 }
 
 const instructions: Instruction[] = [
@@ -221,9 +231,67 @@ const instructions: Instruction[] = [
     name: InstructionName.SKP_VX,
     mask: 0xf0ff,
     pattern: 0xe09e,
-    arguments: [
-      { mask: 0x0f00, shift: 8 },
-    ],
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.SKNP_VX,
+    mask: 0xf0ff,
+    pattern: 0xe0a1,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_VX_DT,
+    mask: 0xf0ff,
+    pattern: 0xf007,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_VX_K,
+    mask: 0xf0ff,
+    pattern: 0xf00a,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_DT_VX,
+    mask: 0xf0ff,
+    pattern: 0xf015,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_ST_VX,
+    mask: 0xf0ff,
+    pattern: 0xf018,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_ST_VX,
+    mask: 0xf0ff,
+    pattern: 0xf01e,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_F_VX,
+    mask: 0xf0ff,
+    pattern: 0xf029,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_B_VX,
+    mask: 0xf0ff,
+    pattern: 0xf033,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_I_VX,
+    mask: 0xf0ff,
+    pattern: 0xf055,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
+  },
+  {
+    name: InstructionName.LD_VX_I,
+    mask: 0xf0ff,
+    pattern: 0xf065,
+    arguments: [{ mask: 0x0f00, shift: 8 }],
   },
 ];
 
