@@ -1,74 +1,80 @@
 export type Instruction = {
   name: InstructionName;
+  key: number;
   mask: number;
   pattern: number;
   arguments: Array<{ mask: number; shift: number }>;
 };
 
 export enum InstructionName {
-  CLS,
-  RET,
-  JMP_ADDR,
-  CALL_ADDR,
-  SE_VX_NN,
-  SNE_VX_NN,
-  SE_VX_VY,
-  LD_VX,
-  ADD_VX,
-  LD_VX_VY,
-  OR_VX_VY,
-  AND_VX_VY,
-  XOR_VX_VY,
-  ADD_VX_VY,
-  SUB_VX_VY,
-  SHR_VX,
-  SUBN_VX_VY,
-  SHL_VX,
-  SNE_VX_VY,
-  LD_I_ADDR,
-  JP_V0_ADDR,
-  RND_VX,
-  DRW_VX_VY_NIB,
-  SKP_VX,
-  SKNP_VX,
-  LD_VX_DT,
-  LD_VX_K,
-  LD_DT_VX,
-  LD_ST_VX,
-  ADD_I_VX,
-  LD_F_VX,
-  LD_B_VX,
-  LD_I_VX,
-  LD_VX_I,
+  CLS = "CLS",
+  RET = "RET",
+  JMP_ADDR = "JMP_ADDR",
+  CALL_ADDR = "CALL_ADDR",
+  SE_VX_NN = "SE_VX_NN",
+  SNE_VX_NN = "SNE_VX_NN",
+  SE_VX_VY = "SE_VX_VY",
+  LD_VX_NN = "LD_VX_NN",
+  ADD_VX_NN = "ADD_VX_NN",
+  LD_VX_VY = "LD_VX_VY",
+  OR_VX_VY = "OR_VX_VY",
+  AND_VX_VY = "AND_VX_VY",
+  XOR_VX_VY = "XOR_VX_VY",
+  ADD_VX_VY = "ADD_VX_VY",
+  SUB_VX_VY = "SUB_VX_VY",
+  SHR_VX_VY = "SHR_VX_VY",
+  SUBN_VX_VY = "SUBN_VX_VY",
+  SHL_VX_VY = "SHL_VX_VY",
+  SNE_VX_VY = "SNE_VX_VY",
+  LD_I_ADDR = "LD_I_ADDR",
+  JP_V0_ADDR = "JP_V0_ADDR",
+  RND_VX_NN = "RND_VX_NN",
+  DRW_VX_VY_NIB = "DRW_VX_VY_NIB",
+  SKP_VX = "SKP_VX",
+  SKNP_VX = "SKNP_VX",
+  LD_VX_DT = "LD_VX_DT",
+  LD_VX_N = "LD_VX_N",
+  LD_DT_VX = "LD_DT_VX",
+  LD_ST_VX = "LD_ST_VX",
+  ADD_I_VX = "ADD_I_VX",
+  LD_F_VX = "LD_F_VX",
+  LD_B_VX = "LD_B_VX",
+  LD_I_VX = "LD_I_VX",
+  LD_VX_I = "LD_VX_I",
 }
 
 const instructions: Instruction[] = [
   {
     name: InstructionName.CLS,
+    key: 2,
     mask: 0xffff,
     pattern: 0x00e0,
     arguments: [],
   },
   {
     name: InstructionName.RET,
+    key: 3,
     mask: 0xffff,
     pattern: 0x00ee,
     arguments: [],
   },
   {
     name: InstructionName.JMP_ADDR,
+    key: 4,
     mask: 0xf000,
     pattern: 0x1000,
     arguments: [{ mask: 0x0fff, shift: 0 }],
   },
   {
     name: InstructionName.CALL_ADDR,
+    key: 5,
     mask: 0xf000,
     pattern: 0x2000,
     arguments: [{ mask: 0x0fff, shift: 0 }],
   },
   {
     name: InstructionName.SE_VX_NN,
+    key: 6,
     mask: 0xf000,
     pattern: 0x3000,
     arguments: [
@@ -78,6 +84,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.SNE_VX_NN,
+    key: 7,
     mask: 0xf000,
     pattern: 0x4000,
     arguments: [
@@ -86,7 +93,8 @@ const instructions: Instruction[] = [
     ],
   },
   {
-    name: InstructionName.SNE_VX_NN,
+    name: InstructionName.SE_VX_VY,
+    key: 8,
     mask: 0xf00f,
     pattern: 0x5000,
     arguments: [
@@ -95,7 +103,8 @@ const instructions: Instruction[] = [
     ],
   },
   {
-    name: InstructionName.LD_VX,
+    name: InstructionName.LD_VX_NN,
+    key: 9,
     mask: 0xf000,
     pattern: 0x6000,
     arguments: [
@@ -104,7 +113,8 @@ const instructions: Instruction[] = [
     ],
   },
   {
-    name: InstructionName.ADD_VX,
+    name: InstructionName.ADD_VX_NN,
+    key: 10,
     mask: 0xf000,
     pattern: 0x7000,
     arguments: [
@@ -114,6 +124,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.LD_VX_VY,
+    key: 11,
     mask: 0xf00f,
     pattern: 0x8000,
     arguments: [
@@ -123,6 +134,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.OR_VX_VY,
+    key: 12,
     mask: 0xf00f,
     pattern: 0x8001,
     arguments: [
@@ -132,6 +144,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.AND_VX_VY,
+    key: 13,
     mask: 0xf00f,
     pattern: 0x8002,
     arguments: [
@@ -141,6 +154,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.XOR_VX_VY,
+    key: 14,
     mask: 0xf00f,
     pattern: 0x8003,
     arguments: [
@@ -150,6 +164,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.ADD_VX_VY,
+    key: 15,
     mask: 0xf00f,
     pattern: 0x8004,
     arguments: [
@@ -159,6 +174,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.SUB_VX_VY,
+    key: 16,
     mask: 0xf00f,
     pattern: 0x8005,
     arguments: [
@@ -167,13 +183,15 @@ const instructions: Instruction[] = [
     ],
   },
   {
-    name: InstructionName.SHR_VX,
+    name: InstructionName.SHR_VX_VY,
+    key: 17,
     mask: 0xf00f,
     pattern: 0x8006,
-    arguments: [{ mask: 0x0f00, shift: 8 }],
+    arguments: [{ mask: 0x0f00, shift: 8 }, { mask: 0x00f0, shift: 4 }],
   },
   {
     name: InstructionName.SUBN_VX_VY,
+    key: 18,
     mask: 0xf00f,
     pattern: 0x8007,
     arguments: [
@@ -182,13 +200,15 @@ const instructions: Instruction[] = [
     ],
   },
   {
-    name: InstructionName.SHL_VX,
+    name: InstructionName.SHL_VX_VY,
+    key: 19,
     mask: 0xf00f,
     pattern: 0x800e,
-    arguments: [{ mask: 0x0f00, shift: 8 }],
+    arguments: [{ mask: 0x0f00, shift: 8 }, { mask: 0x00f0, shift: 4 }],
   },
   {
-    name: InstructionName.SHL_VX,
+    name: InstructionName.SNE_VX_VY,
+    key: 20,
     mask: 0xf00f,
     pattern: 0x9000,
     arguments: [
@@ -198,18 +218,21 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.LD_I_ADDR,
+    key: 21,
     mask: 0xf000,
     pattern: 0xa000,
     arguments: [{ mask: 0x0fff, shift: 0 }],
   },
   {
     name: InstructionName.JP_V0_ADDR,
+    key: 22,
     mask: 0xf000,
     pattern: 0xb000,
     arguments: [{ mask: 0x0fff, shift: 0 }],
   },
   {
-    name: InstructionName.RND_VX,
+    name: InstructionName.RND_VX_NN,
+    key: 23,
     mask: 0xf000,
     pattern: 0xc000,
     arguments: [
@@ -219,6 +242,7 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.DRW_VX_VY_NIB,
+    key: 24,
     mask: 0xf000,
     pattern: 0xd000,
     arguments: [
@@ -229,66 +253,77 @@ const instructions: Instruction[] = [
   },
   {
     name: InstructionName.SKP_VX,
+    key: 25,
     mask: 0xf0ff,
     pattern: 0xe09e,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.SKNP_VX,
+    key: 26,
     mask: 0xf0ff,
     pattern: 0xe0a1,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_VX_DT,
+    key: 27,
     mask: 0xf0ff,
     pattern: 0xf007,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
-    name: InstructionName.LD_VX_K,
+    name: InstructionName.LD_VX_N,
+    key: 28,
     mask: 0xf0ff,
     pattern: 0xf00a,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_DT_VX,
+    key: 29,
     mask: 0xf0ff,
     pattern: 0xf015,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_ST_VX,
+    key: 30,
     mask: 0xf0ff,
     pattern: 0xf018,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
-    name: InstructionName.LD_ST_VX,
+    name: InstructionName.ADD_I_VX,
+    key: 31,
     mask: 0xf0ff,
     pattern: 0xf01e,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_F_VX,
+    key: 32,
     mask: 0xf0ff,
     pattern: 0xf029,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_B_VX,
+    key: 33,
     mask: 0xf0ff,
     pattern: 0xf033,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_I_VX,
+    key: 34,
     mask: 0xf0ff,
     pattern: 0xf055,
     arguments: [{ mask: 0x0f00, shift: 8 }],
   },
   {
     name: InstructionName.LD_VX_I,
+    key: 35,
     mask: 0xf0ff,
     pattern: 0xf065,
     arguments: [{ mask: 0x0f00, shift: 8 }],

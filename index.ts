@@ -1,11 +1,17 @@
-import { CPU } from './cpu'
-import { TerminalInterface } from './interface';
+import { CPU } from "./cpu";
+import { TerminalInterface } from "./interface";
+
 import fs from 'fs';
+const fileContents = fs.readFileSync('./WALL');
 
-// const cpu = new CPU(new TerminalInterface())
-// const rom = fs.readFileSync('./BLINKY');
-// // cpu.load(rom);
+const cpu = new CPU(new TerminalInterface());
 
-// console.log(cpu.memory)
+cpu.load(fileContents);
 
-new TerminalInterface()
+function cycle() {
+  cpu.step()
+
+  setTimeout(cycle, 0.1)
+}
+
+cycle()

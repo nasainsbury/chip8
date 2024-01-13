@@ -2,12 +2,13 @@ import instructions, {
   type Instruction,
   InstructionName,
 } from "./instructions";
-
+import FONT_SET from "./FONT_SET";
+import fs from 'fs';
 import { type TerminalInterface } from "./interface";
 
 export class CPU {
   public memory = new Uint8Array(4096);
-  private registers = new Uint8Array(16);
+  public registers = new Uint8Array(16);
   private stack = new Uint16Array(16);
   private ST = 0;
   private DT = 0;
@@ -26,11 +27,11 @@ export class CPU {
   }
   private fetch() {
     if (this.PC > 4094) {
-      this.halted = true;
+      this.halt();
       throw new Error("Memory out of bounds");
     }
 
-    const opcode = (this.memory[this.PC] << 8) | this.memory[this.PC + 1];
+    const opcode = (this.memory[this.PC] << 8) | (this.memory[this.PC + 1] << 0);
     return opcode;
   }
   private skipInstruction() {
@@ -64,6 +65,7 @@ export class CPU {
         break;
       case InstructionName.RET:
         if (this.SP === -1) {
+          this.halt();
           throw new Error("Stack underflow.");
         }
         this.PC = this.stack[this.SP];
@@ -71,10 +73,10 @@ export class CPU {
         break;
       case InstructionName.JMP_ADDR:
         this.PC = args[0];
-        args[2];
         break;
       case InstructionName.CALL_ADDR:
         if (this.SP === 15) {
+          this.halt();
           throw new Error("Stack overflow");
         }
         this.SP++;
@@ -102,11 +104,11 @@ export class CPU {
           this.nextInstruction();
         }
         break;
-      case InstructionName.LD_VX:
+      case InstructionName.LD_VX_NN:
         this.registers[args[0]] = args[1];
         this.nextInstruction();
         break;
-      case InstructionName.ADD_VX:
+      case InstructionName.ADD_VX_NN:
         this.registers[args[0]] += args[1];
         this.nextInstruction();
         break;
@@ -123,11 +125,12 @@ export class CPU {
         this.nextInstruction();
         break;
       case InstructionName.XOR_VX_VY:
-        this.registers[args[0]] *= this.registers[args[1]];
+        this.registers[args[0]] ^= this.registers[args[1]];
         this.nextInstruction();
         break;
       case InstructionName.ADD_VX_VY:
         const sum = this.registers[args[0]] + this.registers[args[1]];
+
         this.registers[0xf] = sum > 0xff ? 1 : 0;
         this.registers[args[0]] = sum;
         this.nextInstruction();
@@ -138,20 +141,20 @@ export class CPU {
         this.registers[args[0]] = diffX;
         this.nextInstruction();
         break;
-      case InstructionName.SHR_VX:
+      case InstructionName.SHR_VX_VY:
         this.registers[0xf] = this.registers[args[0]] & 1;
         this.registers[args[0]] >>= 1;
         this.nextInstruction();
         break;
       case InstructionName.SUBN_VX_VY:
         const diffY = this.registers[args[1]] - this.registers[args[0]];
-        this.registers[0xf] = diffY > 0x00 ? 1 : 0;
+        this.registers[0xf] = diffY > 0x01 ? 1 : 0;
         this.registers[args[0]] = diffY;
         this.nextInstruction();
         break;
-      case InstructionName.SHL_VX:
-        this.registers[0xf] = args[0] >> 7;
-        this.registers[args[0]] << 1;
+      case InstructionName.SHL_VX_VY:
+        this.registers[0xf] = this.registers[args[0]] >> 7;
+        this.registers[args[0]] <<= 1;
         this.nextInstruction();
         break;
       case InstructionName.SNE_VX_VY:
@@ -168,9 +171,9 @@ export class CPU {
       case InstructionName.JP_V0_ADDR:
         this.PC = this.registers[0] + args[0];
         break;
-      case InstructionName.RND_VX:
-        const rand = Math.floor(Math.random() * 0xff);
-        this.registers[args[0]] = rand & args[1];
+      case InstructionName.RND_VX_NN:
+        const random = Math.floor(Math.random() * 0xff);
+        this.registers[args[0]] = random & args[1];
         this.nextInstruction();
         break;
       case InstructionName.DRW_VX_VY_NIB:
@@ -181,14 +184,12 @@ export class CPU {
           for (let position = 0; position < 8; position++) {
             const bit = line & (1 << (7 - position)) ? 1 : 0;
             // Screen is 64px wide
-            const x = (args[0] + position) % this.cpuInterface.width;
+            const x = (this.registers[args[0]] + position) % this.cpuInterface.width;
             // Screen is 32px high
-            const y = (args[1] + i) % this.cpuInterface.height;
-
+            const y = (this.registers[args[1]] + i) % this.cpuInterface.height;
             if (this.cpuInterface.drawPixel(x, y, bit)) {
-            } else {
               this.registers[0xf] = 1;
-            }
+            } 
           }
         }
         this.nextInstruction();
@@ -211,7 +212,7 @@ export class CPU {
         this.registers[args[0]] = this.DT;
         this.nextInstruction();
         break;
-      case InstructionName.LD_VX_K:
+      case InstructionName.LD_VX_N:
         const keyPress = this.cpuInterface.getKey();
         if (!keyPress) {
           return;
@@ -231,7 +232,7 @@ export class CPU {
       case InstructionName.ADD_I_VX:
         this.I += this.registers[args[0]];
         this.nextInstruction();
-        break;
+        break;   
       case InstructionName.LD_F_VX:
         if (this.registers[args[0]] > 0xf) {
           this.halt();
@@ -273,7 +274,7 @@ export class CPU {
 
         this.nextInstruction();
         break;
-      case InstructionName.LD_I_VX:
+      case InstructionName.LD_VX_I:
         if (this.I > 4095 - args[0]) {
           this.halt();
           throw new Error("Memory out of bounds.");
@@ -286,16 +287,20 @@ export class CPU {
         this.nextInstruction();
         break;
       default:
-        return;
+        this.halt();
+        throw new Error('Illegal instruction.')
     }
   }
   public load(rom: Buffer) {
-    rom.forEach((hex, index) => {
-      console.log(hex);
-      // First byte
-      this.memory[0x200 + index] = hex >> 8;
-      // Second byte
-      this.memory[0x200 + index + 1] = hex & 0xff;
+    // first 80 bytes for font set
+    for (let i = 0; i < FONT_SET.length; i++) {
+      this.memory[i] = FONT_SET[i]
+    }
+
+    this.halted = false;
+
+    Buffer.from(rom).forEach((byte, index) => {
+      this.memory[0x200 + index] = byte;
     });
   }
   public step() {
@@ -306,6 +311,7 @@ export class CPU {
     try {
       const opcode = this.fetch();
       const { instruction, args } = this.getInstruction(opcode);
+      fs.appendFileSync('./output', `0x${opcode.toString(16)}\n`)
       this.execute(instruction, args);
     } catch (err) {
       console.error(err);

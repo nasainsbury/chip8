@@ -2,23 +2,23 @@ import blessed from "blessed";
 
 type Bit = 1 | 0;
 
-const keyMap = {
+const keyMap: { [key: string]: number} = {
   "1": 0,
   "2": 1,
   "3": 2,
   "4": 3,
-  q: 4,
-  w: 5,
-  e: 6,
-  r: 7,
-  a: 8,
-  s: 9,
-  d: 10,
-  f: 11,
-  z: 12,
-  x: 13,
-  c: 14,
-  v: 15,
+  "q": 4,
+  "w": 5,
+  "e": 6,
+  "r": 7,
+  "a": 8,
+  "s": 9,
+  "d": 10,
+  "f": 11,
+  "z": 12,
+  "x": 13,
+  "c": 14,
+  "v": 15,
 };
 
 export interface CPUInterface {
@@ -41,8 +41,13 @@ export class TerminalInterface implements CPUInterface {
   constructor() {
     this.createFrameBuffer();
 
+    this.screen.key(['escape', 'C-c'], () => {
+      process.exit(0)
+    });
+
     this.screen.on("keypress", (_, key) => {
       if (keyMap[key.full]) {
+        const index: number = keyMap[key.full];
         /**
          * this.keys = 0b0000000000000000
          * multiple keys can be pressed at once
@@ -50,9 +55,9 @@ export class TerminalInterface implements CPUInterface {
          * i.e 0b1100000000000000 would represent "v" and "c" being pressed
          * this shifts bit to left by the index to be used as a max
          */
-        const keyMask = 1 << keyMap[key.full];
+        const keyMask = 1 << index;
         this.keys |= keyMask;
-        this.key = keyMap[key.full];
+        this.key = index;
       }
     });
 
@@ -71,7 +76,7 @@ export class TerminalInterface implements CPUInterface {
   }
   public createFrameBuffer() {
     for (let x = 0; x < this.width; x++) {
-      const row = [];
+      this.buffer.push([]);
       for (let y = 0; y < this.height; y++) {
         this.buffer[x].push(0);
       }
@@ -82,14 +87,14 @@ export class TerminalInterface implements CPUInterface {
     this.screen.clearRegion(0, this.width, 0, this.height);
   }
   public drawPixel(x: number, y: number, bit: Bit): boolean {
+
     const coord = this.buffer[y][x];
     const collision = coord & bit;
     this.buffer[y][x] ^= bit;
 
     // Pixel present
     if (this.buffer[y][x]) {
-      console.log("cool");
-      this.screen.fillRegion(this.color, "█", x, x + 1, y, y + 1);
+      this.screen.fillRegion(this.color, " ", x, x + 1, y, y + 1);
     } else {
       this.screen.clearRegion(x, x + 1, y, y + 1);
     }
