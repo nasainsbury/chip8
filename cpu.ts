@@ -318,7 +318,6 @@ export class CPU {
     try {
       const opcode = this.fetch();
       const { instruction, args } = this.getInstruction(opcode);
-      fs.appendFileSync("./output", `0x${opcode.toString(16)}\n`);
       this.execute(instruction, args);
     } catch (err) {
       console.error(err);
