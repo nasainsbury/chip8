@@ -1,17 +1,17 @@
 import { CPU } from "./cpu";
-import { TerminalInterface } from "./interface";
+import { TerminalInterface } from "./interfaces/terminal";
 
-import fs from 'fs';
-const fileContents = fs.readFileSync('./WALL');
+import fs from "fs";
+const fileContents = fs.readFileSync("./rom/WALL");
 
 const cpu = new CPU(new TerminalInterface());
 
 cpu.load(fileContents);
 
 function cycle() {
-  cpu.step()
+  cpu.step();
 
-  setTimeout(cycle, 0.1)
+  setTimeout(cycle, 1);
 }
 
-cycle()
+cycle();

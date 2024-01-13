@@ -2,9 +2,9 @@ import instructions, {
   type Instruction,
   InstructionName,
 } from "./instructions";
-import FONT_SET from "./FONT_SET";
-import fs from 'fs';
-import { type TerminalInterface } from "./interface";
+import FONT_SET from "./interfaces/FONT_SET";
+import fs from "fs";
+import { type TerminalInterface } from "./interfaces/terminal";
 
 export class CPU {
   public memory = new Uint8Array(4096);
@@ -31,7 +31,8 @@ export class CPU {
       throw new Error("Memory out of bounds");
     }
 
-    const opcode = (this.memory[this.PC] << 8) | (this.memory[this.PC + 1] << 0);
+    const opcode =
+      (this.memory[this.PC] << 8) | (this.memory[this.PC + 1] << 0);
     return opcode;
   }
   private skipInstruction() {
@@ -179,7 +180,7 @@ export class CPU {
       case InstructionName.DRW_VX_VY_NIB:
         if (this.I > 4095 - args[2]) {
           this.halt();
-          throw new Error('Memory out of bounds.')
+          throw new Error("Memory out of bounds.");
         }
         this.registers[0xf] = 0;
 
@@ -187,14 +188,15 @@ export class CPU {
           const line = this.memory[this.I + i];
           // Go through each bit in the byte
           for (let position = 0; position < 8; position++) {
-            const bit = line & (1 << (7 - position)) ? 1 : 0
+            const bit = line & (1 << (7 - position)) ? 1 : 0;
             // Screen is 64px wide
-            const x = (this.registers[args[0]] + position) % this.cpuInterface.width;
+            const x =
+              (this.registers[args[0]] + position) % this.cpuInterface.width;
             // Screen is 32px high
             const y = (this.registers[args[1]] + i) % this.cpuInterface.height;
             if (this.cpuInterface.drawPixel(x, y, bit)) {
               this.registers[0xf] = 1;
-            } 
+            }
           }
         }
         this.nextInstruction();
@@ -237,7 +239,7 @@ export class CPU {
       case InstructionName.ADD_I_VX:
         this.I += this.registers[args[0]];
         this.nextInstruction();
-        break;   
+        break;
       case InstructionName.LD_F_VX:
         if (this.registers[args[0]] > 0xf) {
           this.halt();
@@ -293,13 +295,13 @@ export class CPU {
         break;
       default:
         this.halt();
-        throw new Error('Illegal instruction.')
+        throw new Error("Illegal instruction.");
     }
   }
   public load(rom: Buffer) {
     // first 80 bytes for font set
     for (let i = 0; i < FONT_SET.length; i++) {
-      this.memory[i] = FONT_SET[i]
+      this.memory[i] = FONT_SET[i];
     }
 
     this.halted = false;
@@ -316,7 +318,7 @@ export class CPU {
     try {
       const opcode = this.fetch();
       const { instruction, args } = this.getInstruction(opcode);
-      fs.appendFileSync('./output', `0x${opcode.toString(16)}\n`)
+      fs.appendFileSync("./output", `0x${opcode.toString(16)}\n`);
       this.execute(instruction, args);
     } catch (err) {
       console.error(err);
