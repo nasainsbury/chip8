@@ -177,12 +177,17 @@ export class CPU {
         this.nextInstruction();
         break;
       case InstructionName.DRW_VX_VY_NIB:
+        if (this.I > 4095 - args[2]) {
+          this.halt();
+          throw new Error('Memory out of bounds.')
+        }
         this.registers[0xf] = 0;
+
         for (let i = 0; i < args[2]; i++) {
           const line = this.memory[this.I + i];
           // Go through each bit in the byte
           for (let position = 0; position < 8; position++) {
-            const bit = line & (1 << (7 - position)) ? 1 : 0;
+            const bit = line & (1 << (7 - position)) ? 1 : 0
             // Screen is 64px wide
             const x = (this.registers[args[0]] + position) % this.cpuInterface.width;
             // Screen is 32px high

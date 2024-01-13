@@ -2,7 +2,7 @@ import blessed from "blessed";
 
 type Bit = 1 | 0;
 
-const keyMap: { [key: string]: number} = {
+const keyMap: { [key: string]: number } = {
   "1": 0,
   "2": 1,
   "3": 2,
@@ -33,8 +33,8 @@ export class TerminalInterface implements CPUInterface {
   public height = 32;
   public buffer: Bit[][] = [];
   private blessed = blessed;
-  private color = this.blessed.colors.match("#FFF");
-  private screen = this.blessed.screen({ smartCSR: true });
+  private color = this.blessed.colors.match("#fff");
+  private screen = this.blessed.screen({ smartCSR: true, dockBorders: true });
   private keys: number = 0;
   private key: number | undefined;
 
@@ -46,7 +46,7 @@ export class TerminalInterface implements CPUInterface {
     });
 
     this.screen.on("keypress", (_, key) => {
-      if (keyMap[key.full]) {
+      if (keyMap[key.full] > -1) {
         const index: number = keyMap[key.full];
         /**
          * this.keys = 0b0000000000000000
@@ -65,7 +65,7 @@ export class TerminalInterface implements CPUInterface {
       // Emulate a keyup event to clear all pressed keys
       this.keys = 0;
       this.key = undefined;
-    }, 100);
+    }, 300);
   }
 
   public getKeys() {
@@ -75,12 +75,14 @@ export class TerminalInterface implements CPUInterface {
     return this.key;
   }
   public createFrameBuffer() {
-    for (let x = 0; x < this.width; x++) {
-      this.buffer.push([]);
-      for (let y = 0; y < this.height; y++) {
-        this.buffer[x].push(0);
+    const buffer: Bit[][] = [];
+    for (let i = 0; i < this.width; i++) {
+      buffer.push([]);
+      for (let j = 0; j < this.height; j++) {
+        buffer[i].push(0);
       }
     }
+    this.buffer = buffer;
   }
   public clearDisplay() {
     this.createFrameBuffer();
